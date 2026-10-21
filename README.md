@@ -26,16 +26,16 @@ python -m pip install -r requirements.txt
 Run a short training pass first. TensorFlow downloads the standard MNIST dataset automatically:
 
 ```bash
-python run.py --epochs 3 --train 2000 --test 1000 --output runs/first-test
+python run.py --epochs 3 --train 2000 --test 1000
 ```
 
 Then train the configured one-screen model on the full 55,000 / 5,000 / 10,000 split:
 
 ```bash
-python run.py --epochs 5 --output runs/full-one-screen
+python run.py --epochs 5
 ```
 
-Each run saves its JSON configuration and metrics, the best validation phase map, sample predictions, and a plot under `runs/<name>/`. Runs are ignored by Git so the repository stays small. To inspect saved results in the browser:
+Each run prints its output folder and saves its JSON configuration and metrics, the best validation phase map, sample predictions, and a plot under `runs/<timestamp>/`. Runs are ignored by Git so the repository stays small. To inspect saved results in the browser:
 
 ```bash
 streamlit run app.py
