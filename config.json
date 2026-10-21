@@ -1,0 +1,14 @@
+{
+  "wavelength_nm": 532,
+  "film_thickness_um": 16,
+  "film_index": 1.5,
+  "sheet_width_mm": 25.4,
+  "sheet_height_mm": 50.8,
+  "aperture_mm": 0.8192,
+  "grid": 128,
+  "cells": 16,
+  "layers": 1,
+  "distance_mm": 100,
+  "padding": 2,
+  "seed": 7
+}

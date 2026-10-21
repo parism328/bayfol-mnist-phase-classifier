@@ -1,0 +1,6 @@
+tensorflow==2.20.0
+numpy>=1.26,<2.2
+matplotlib>=3.8,<4
+pillow>=10,<13
+streamlit>=1.40,<2
+pytest>=8,<10
