@@ -24,12 +24,14 @@ def main():
     a.add_argument('--epochs',type=int,default=5); a.add_argument('--train',type=int,default=55000)
     a.add_argument('--test',type=int,default=10000); a.add_argument('--batch',type=int,default=32)
     a.add_argument('--cells',type=int); a.add_argument('--layers',type=int); a.add_argument('--padding',type=int)
+    a.add_argument('--seed',type=int)
     args=a.parse_args()
     if not (1<=args.train<=55000 and 1<=args.test<=10000 and args.epochs>0 and args.batch>0):
         a.error('train 1..55000; test 1..10000; epochs and batch positive')
     c=json.loads(Path(args.config).read_text())
     for key in ['cells','layers','padding']:
         if getattr(args,key) is not None: c[key]=getattr(args,key)
+    if args.seed is not None: c['seed']=args.seed
     tf.keras.utils.set_random_seed(c['seed'])
     model=DiffractiveClassifier(c); optimizer=tf.keras.optimizers.Adam(.03)
     (x,y),(xt,yt)=tf.keras.datasets.mnist.load_data()

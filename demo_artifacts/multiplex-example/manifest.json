@@ -1,0 +1,59 @@
+{
+  "scope": "Numerical angular-channel example: separately trained one-screen classifiers, each with one LETO object-arm phase candidate.",
+  "physical_layer_count": 1,
+  "bayfol_recording_volume_count": 1,
+  "channel_count": 2,
+  "same_film_patch_reused_for_each_recording": true,
+  "reference_angle_spacing_deg": 2.5,
+  "channels": [
+    {
+      "channel": 1,
+      "directory": "channel-01",
+      "reference_angle_external_deg": 46.91,
+      "test_accuracy": 0.17,
+      "leto_image": "LETO_FILES_TO_DISPLAY/LETO_CHANNEL_01_REF_46.91deg.png"
+    },
+    {
+      "channel": 2,
+      "directory": "channel-02",
+      "reference_angle_external_deg": 49.41,
+      "test_accuracy": 0.265,
+      "leto_image": "LETO_FILES_TO_DISPLAY/LETO_CHANNEL_02_REF_49.41deg.png"
+    }
+  ],
+  "weak_grating_angular_screen": {
+    "channel_count": 2,
+    "reference_angle_spacing_deg": 2.5,
+    "reference_angles_external_deg": [
+      46.91,
+      49.41
+    ],
+    "weak_grating_response_matrix": [
+      [
+        1.0,
+        0.00021260003850017244
+      ],
+      [
+        0.0001277950269796686,
+        1.0
+      ]
+    ],
+    "off_channel_to_selected_channel_ratio": [
+      [
+        1.0,
+        0.00021260003850017244
+      ],
+      [
+        0.0001277950269796686,
+        1.0
+      ]
+    ],
+    "scope": "Idealized weak-grating angular selectivity only; not Bayfol recording capacity or measured cross-talk."
+  },
+  "limitations": [
+    "Patterns are object-arm phase drives; separate coherent reference beams and sequential exposures are required.",
+    "No fringe pattern, Bayfol dose, recording competition, shrinkage, or reconstructed classifier is simulated.",
+    "Reference angles and LETO gray-to-phase calibration must be measured for hardware use."
+  ],
+  "display_files_folder": "LETO_FILES_TO_DISPLAY"
+}

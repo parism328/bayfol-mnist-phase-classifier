@@ -86,6 +86,31 @@ def phase_budget(aperture_mm, cells):
     }
 
 
+def angular_channel_screen(count, spacing_deg, object_angle_deg, reference_angle_deg,
+                           wavelength_m, thickness_m, refractive_index):
+    """Weak-grating angular response for separately recorded reference-angle channels."""
+    if count < 1 or spacing_deg <= 0:
+        raise ValueError("channels must be >=1 and angle spacing must be positive")
+    offsets = (np.arange(count) - (count - 1) / 2) * spacing_deg
+    refs = reference_angle_deg + offsets
+    response = np.zeros((count, count), dtype=float)
+    for read_idx, read in enumerate(refs):
+        for recorded_idx, recorded_ref in enumerate(refs):
+            response[read_idx, recorded_idx] = relative_weak_grating_efficiency(
+                read, object_angle_deg, recorded_ref, wavelength_m,
+                thickness_m, refractive_index)
+    diagonal = np.diag(response)
+    normalized = response / np.maximum(diagonal[:, None], 1e-12)
+    return {
+        "channel_count": count,
+        "reference_angle_spacing_deg": spacing_deg,
+        "reference_angles_external_deg": refs.tolist(),
+        "weak_grating_response_matrix": response.tolist(),
+        "off_channel_to_selected_channel_ratio": normalized.tolist(),
+        "scope": "Idealized weak-grating angular selectivity only; not Bayfol recording capacity or measured cross-talk.",
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="config.json")
@@ -93,13 +118,15 @@ def main():
     parser.add_argument("--cells", type=int, nargs="+", default=[4, 8, 16, 32, 64])
     parser.add_argument("--object-angle-deg", type=float, default=-48.16)
     parser.add_argument("--reference-angle-deg", type=float, default=48.16)
+    parser.add_argument("--angular-channels", type=int, default=3)
+    parser.add_argument("--angle-spacing-deg", type=float, default=1.0)
     args = parser.parse_args()
     config = json.loads(Path(args.config).read_text())
     thickness = config["film_thickness_um"] * 1e-6
     wavelength = config["wavelength_nm"] * 1e-9
     index = config["film_index"]
     result = {
-        "scope": "One weak volume grating, first-order Bragg-angle screen; no multiplexing or storage-capacity prediction.",
+        "scope": "One-grating angular response plus an idealized reference-angle channel screen; not a multiplexing capacity or storage-capacity prediction.",
         "assumptions": {
             "film_thickness_um": config["film_thickness_um"],
             "wavelength_nm": config["wavelength_nm"],
@@ -118,6 +145,9 @@ def main():
             thickness,
             index,
         ),
+        "angular_multiplexing_screen": angular_channel_screen(
+            args.angular_channels, args.angle_spacing_deg, args.object_angle_deg,
+            args.reference_angle_deg, wavelength, thickness, index),
         "interpretation": "Cell count controls the classifier mask's numerical phase degrees of freedom. Thickness mainly changes volume-grating angular and wavelength selectivity. The two counts are not interchangeable.",
     }
     output = Path(args.output)

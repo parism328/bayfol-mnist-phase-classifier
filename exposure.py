@@ -66,19 +66,34 @@ def main():
     else:
         gray=(np.rint(wrapped*256/(2*np.pi)).astype(int)%256).astype(np.uint8)
         actual=gray.astype(np.float32)*2*np.pi/256
+    drive_phase=np.mod(actual,2*np.pi).astype(np.float32)
     predicted=forward(tf.constant(actual,tf.float32)).numpy()
     a=target.numpy()[roi];b=predicted[roi]
     report={'scope':'Candidate object-arm field only. Separate coherent reference required. No material dose or readout model.',
       'calibration':'Measured supplied LUT' if args.lut else 'IDEAL LUT; uncalibrated',
       'wavelength_nm':c['wavelength_nm'],'focal_mm':args.focal_mm,'slm_lens_mm':args.focal_mm,
+      'leto_drive_image': 'SLM_LUT.png' if args.lut else 'SLM_IDEAL_LUT.png',
+      'leto_image_resolution_pixels':[w,h],
+      'assumed_leto_pixel_pitch_um':pitch*1e6,
+      'assumed_leto_active_area_mm':[w*pitch*1e3,h*pitch*1e3],
+      'film_target_plane':'Back focal plane of the modeled lens; object-arm field only.',
+      'film_target_square_aperture_mm':[c['aperture_mm'],c['aperture_mm']],
+      'film_target_sample_count_xy':[int(np.count_nonzero(np.any(roi,axis=0))),int(np.count_nonzero(np.any(roi,axis=1)))],
+      'learned_phase_cells_xy':[k,k],
+      'learned_phase_cell_pitch_um':c['aperture_mm']*1000/k,
+      'recording_unit':'One continuous square target patch in one film area; not a hogel array.',
+      'gray_to_phase_mapping':'Measured supplied LUT' if args.lut else 'Ideal linear mapping: gray 0..255 -> phase 0..2pi; not calibrated for the current LETO.',
+      'what_is_not_in_image':'Reference-beam fringes, Bayfol material response, exposure dose, and readout response.',
       'target_scale':scale,'roi_complex_mse':float(np.sum(np.abs(a-b)**2)/np.sum(np.abs(a)**2)),
       'roi_fidelity':float(np.abs(np.vdot(a,b))**2/(np.vdot(a,a).real*np.vdot(b,b).real)),
       'full_plane_loss':history,'sampling_note':'FFT samples only; no between-sample validation. Validate before hardware use.'}
     out=folder/'exposure';out.mkdir(exist_ok=True)
     np.save(out/'phase_radians.npy',wrapped)
+    np.save(out/'drive_phase_radians.npy',drive_phase)
     np.savez_compressed(out/'object_field.npz',target=target.numpy(),predicted=predicted,x_m=x,y_m=y,roi=roi)
     Image.fromarray(gray).save(out/('SLM_LUT.png' if args.lut else 'SLM_IDEAL_LUT.png'))
     (out/'metrics.json').write_text(json.dumps(report,indent=2))
+    (out/'LETO_pattern_description.json').write_text(json.dumps(report,indent=2))
     print(json.dumps({k:v for k,v in report.items() if k!='full_plane_loss'},indent=2))
 
 if __name__=='__main__':main()
